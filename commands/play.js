@@ -1,8 +1,8 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const serverSongQueueObject = require("../classes/songqueue.js");
 const videoPlayer = require("../classes/videoplayer.js");
-const ytdl = require("ytdl-core");
 const ytSearch = require('yt-search');
+const playDL = require('play-dl');
 const { entersState, VoiceConnection, VoiceConnectionStatus,joinVoiceChannel } = require('@discordjs/voice');
 
 
@@ -27,30 +27,12 @@ module.exports = {
         // {servers: ['323213213213': {serverQueue: [song1,song2]}, '323215454': {serverQueue: [song1,song2]}]}
 
 
-        let song = {};
-        console.log(message.value)
-        if (ytdl.validateURL(message.value)) {
-            const songInfo = await ytdl.getInfo(message.value);
-            song = {
-                title: songInfo.videoDetails.title,
-                url: songInfo.videoDetails.video_url
-            }
+        const mediaType = await playDL.validate(message.value);
+        let songInfo;
+        if (mediaType) {
+            songInfo = await typeDelegatorSearcher(message.value,mediaType);
         } else {
-            const videoFinder = async (query) => {
-                const videoResult = await ytSearch(query);
-                return (videoResult.videos.length > 1) ? videoResult.videos[0] : null;
-            }
-
-
-            const video = await videoFinder(message.value);
-            if (video) {
-                song = {
-                    title: video.title,
-                    url: video.url
-                }
-            } else {
-                interaction.reply({content: "ERROR: No videos found with the current search criteria",ephemeral:true});
-            }
+            return interaction.reply({content: "Nothing found with the search criteria",ephemeral:true});
         }
 
         
@@ -66,7 +48,8 @@ module.exports = {
             }
 
             serverSongQueueObject.set(interaction.guild.id,queueLiteral);
-            queueLiteral.songs.push(song);
+            songInfo.forEach(e => queueLiteral.songs.push(e));
+            // queueLiteral.songs.push(song);
 
 
             try {
@@ -89,11 +72,29 @@ module.exports = {
                 return interaction.reply({content: "Error, whilst trying to play the song",ephemeral:false});
             }
         } else {
-            serverSongQueueObject.get(interaction.guild.id).songs.push(song);
-            return interaction.reply({content: song.title + " Added to Queue",ephemeral:false});
+            currentQueue = serverSongQueueObject.get(interaction.guild.id).songs;
+            // serverSongQueueObject.get(interaction.guild.id).songs.push(song);
+            songInfo.forEach(e => currentQueue.push(e));
+            return interaction.reply({content: "Song(s) Added to Queue",ephemeral:false});
         }
 
 
         return interaction.reply({content: message.value, ephemeral: false});
     },
+}
+
+
+async function typeDelegatorSearcher(msg,mediaType) {
+    switch (mediaType) {
+        case "search":
+            currentSearch = await playDL.search(msg, { //await
+                limit: 1
+            });
+            return currentSearch;
+        case "yt_video":
+            currentSearch = await playDL.search(msg); //await
+            return currentSearch;    
+        default:
+            throw new Error("Type of media is not supported");    
+    }
 }

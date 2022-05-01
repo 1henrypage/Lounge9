@@ -1,6 +1,8 @@
 const serverSongQueueObject = require('./songqueue.js');
 const ytdl = require("ytdl-core");
+const playDL = require('play-dl');
 const { getVoiceConnection, createAudioPlayer, createAudioResource, AudioPlayerStatus } = require('@discordjs/voice');
+const play = require('../commands/play.js');
 
 // const connectToChannel = async (connnection,channel) => {
 //     try {
@@ -13,7 +15,11 @@ const { getVoiceConnection, createAudioPlayer, createAudioResource, AudioPlayerS
 // }
 
 async function resourceCreator(song) {
-    return ytdl(song.url,{filter:'audioonly'});
+    const stream = await playDL.stream(song.url);
+    let resource = createAudioResource(stream.stream, {
+        inputType: stream.type
+    });
+    return resource;
 }
 
 
@@ -27,23 +33,29 @@ module.exports = async (guild,song) => {
         return;
     }
 
-    //https://github.com/fent/node-ytdl-core/issues/331
-    const stream = ytdl(song.url, {filter: 'audioonly'});
+    const stream = await playDL.stream(song.url);
     //songQueue.connection.play(stream, { seek: 0, volume: 0.5})
     // const subscription = songQueue.connection.subscribe(stream)
+    let resource = createAudioResource(stream.stream, {
+        inputType: stream.type
+    });
 
     let player = createAudioPlayer();
+
     songQueue.connection.subscribe(player);
-
-    let resource = createAudioResource(stream);
     player.play(resource);
-
-    console.log("HEREREHRHEHRE")
 
     player.addListener("stateChange", async (oldOne,newOne) => {
         if (newOne.status=="idle") {
             songQueue.songs.shift();
-            player.play(createAudioResource(resourceCreator(songQueue.songs[0])));
+            if (songQueue.songs[0]) {
+                nextResource = await resourceCreator(songQueue.songs[0]);
+                player.play(nextResource);
+            } else {
+                songQueue.connection.destroy();
+                serverSongQueueObject.delete(guild.id);
+                return;
+            }
         }
     });
 

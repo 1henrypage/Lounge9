@@ -1,4 +1,3 @@
-// Require the necessary discord.js classes
 const fs = require('fs');
 const { Client, Collection, Intents, Interaction } = require('discord.js');
 const { clientId, guildId, token } = require('./config.json');
@@ -40,6 +39,7 @@ for (const file of commandFiles) {
 }
 
 const rest = new REST({ version: '9'}).setToken(token);
+
 (async () => {
 	try {
 		console.log("Started refreshing / commands");
@@ -59,7 +59,6 @@ const rest = new REST({ version: '9'}).setToken(token);
 
 
 
-// When the client is ready, run this code (only once)
 client.once('ready', c => {
 	console.log(`Ready! Logged in as ${c.user.tag}`);
 });
