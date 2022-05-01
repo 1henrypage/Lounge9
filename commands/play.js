@@ -35,10 +35,6 @@ module.exports = {
             return interaction.reply({content: "Nothing found with the search criteria",ephemeral:true});
         }
 
-        
-
-
-        //interaction.guild.i
         if (!serverSongQueueObject.get(interaction.guild.id)) {
             const queueLiteral = {
                 voiceChannel: voiceChannel,
@@ -49,8 +45,6 @@ module.exports = {
 
             serverSongQueueObject.set(interaction.guild.id,queueLiteral);
             songInfo.forEach(e => queueLiteral.songs.push(e));
-            // queueLiteral.songs.push(song);
-
 
             try {
                 const connection = joinVoiceChannel({
@@ -83,16 +77,15 @@ module.exports = {
     },
 }
 
-
 async function typeDelegatorSearcher(msg,mediaType) {
     switch (mediaType) {
         case "search":
-            currentSearch = await playDL.search(msg, { //await
+            currentSearch = await playDL.search(msg, { 
                 limit: 1
             });
             return currentSearch;
         case "yt_video":
-            currentSearch = await playDL.search(msg); //await
+            currentSearch = await playDL.search(msg); 
             return currentSearch;    
         default:
             throw new Error("Type of media is not supported");    
