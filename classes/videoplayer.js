@@ -1,7 +1,7 @@
 const serverSongQueueObject = require('./songqueue.js');
 const playDL = require('play-dl');
 const { getVoiceConnection, createAudioPlayer, createAudioResource, AudioPlayerStatus } = require('@discordjs/voice');
-const play = require('../commands/play.js');
+const play = require('../commands/music_commands/play.js');
 
 module.exports = async (guild,song) => {
     const songQueue = serverSongQueueObject.get(guild.id);
@@ -33,10 +33,6 @@ module.exports = async (guild,song) => {
     });
 
 }
-
-
-//kick behaviour
-//not in channel 
 
 async function resourceCreator(song) {
     const stream = await playDL.stream(song.url);

@@ -4,6 +4,9 @@ const { clientId, guildId, token } = require('./config.json');
 const { REPL_MODE_SLOPPY } = require('repl');
 const { Routes } = require('discord-api-types/v9');
 const { REST } = require('@discordjs/rest');
+const { resolve } = require('path');
+const { getFips } = require('crypto');
+const { readdir } = require('fs').promises;
 
 //commands and songqueue object
 const commands = [];
@@ -20,8 +23,19 @@ const client = new Client({ intents: [Intents.FLAGS.GUILDS,
 	
 client.commands = new Collection();
 
-const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
+// const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
 const eventFiles = fs.readdirSync('./events').filter(file=>file.endsWith('.js'));
+
+
+const commandFolders = fs.readdirSync('./commands');
+for (const folder of commandFolders) {
+	const commandFiles = fs.readdirSync(`./commands/${folder}`).filter(file => file.endsWith('.js'));
+	for (const file of commandFiles) {
+		const command = require(`./commands/${folder}/${file}`);
+		commands.push(command.data.toJSON());
+		client.commands.set(command.data.name, command);
+	}
+}
 
 for (const file of eventFiles) {
 	const event = require(`./events/${file}`);
@@ -32,11 +46,11 @@ for (const file of eventFiles) {
 	}
 }
 
-for (const file of commandFiles) {
-	const command = require(`./commands/${file}`);
-	commands.push(command.data.toJSON());
-	client.commands.set(command.data.name, command);
-}
+// for (const file of commandFiles) {
+// 	const command = require(`./commands/${file}`);
+// 	commands.push(command.data.toJSON());
+// 	client.commands.set(command.data.name, command);
+// }
 
 const rest = new REST({ version: '9'}).setToken(token);
 

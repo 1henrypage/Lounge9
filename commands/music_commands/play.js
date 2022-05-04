@@ -1,6 +1,6 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const serverSongQueueObject = require("../classes/songqueue.js");
-const videoPlayer = require("../classes/videoplayer.js");
+const serverSongQueueObject = require("../../classes/songqueue.js");
+const videoPlayer = require("../../classes/videoplayer.js");
 const ytSearch = require('yt-search');
 const playDL = require('play-dl');
 const { entersState, VoiceConnection, VoiceConnectionStatus,joinVoiceChannel } = require('@discordjs/voice');
