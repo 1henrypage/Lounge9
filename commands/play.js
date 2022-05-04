@@ -30,7 +30,11 @@ module.exports = {
         const mediaType = await playDL.validate(message.value);
         let songInfo;
         if (mediaType) {
-            songInfo = await typeDelegatorSearcher(message.value,mediaType);
+            try {
+                songInfo = await typeDelegatorSearcher(message.value,mediaType);
+            } catch (error) {
+                return interaction.reply({content: "Media type is currently not supported.",ephemeral:true});
+            }
         } else {
             return interaction.reply({content: "Nothing found with the search criteria",ephemeral:true});
         }
@@ -52,6 +56,18 @@ module.exports = {
                     guildId: interaction.guild.id,
                     adapterCreator: interaction.guild.voiceAdapterCreator
                 });
+                connection.on(VoiceConnectionStatus.Disconnected, async (oldState,newState) => {
+                    try {
+                        await Promise.race([
+                            entersState(connection,VoiceConnectionStatus.Signalling,5_000),
+                            entersState(connection,VoiceConnectionStatus.Connecting,5_000),
+                            // No error detected if switching channels or connecting from a discord closed connection
+                        ]);
+                    } catch (error) {
+                        serverSongQueueObject.delete(interaction.guild.id);
+                        connection.destroy();
+                    }
+                });
                 //FIX: PRINT THE CONNECTION HERE
                 try {
                     await entersState(connection,VoiceConnectionStatus.Ready, 30e3);
@@ -71,9 +87,6 @@ module.exports = {
             songInfo.forEach(e => currentQueue.push(e));
             return interaction.reply({content: "Song(s) Added to Queue",ephemeral:false});
         }
-
-
-        return interaction.reply({content: message.value, ephemeral: false});
     },
 }
 
@@ -86,7 +99,15 @@ async function typeDelegatorSearcher(msg,mediaType) {
             return currentSearch;
         case "yt_video":
             currentSearch = await playDL.search(msg); 
-            return currentSearch;    
+            return currentSearch;   
+        case "yt_playlist":
+            fetchedPlaylist = await playDL.playlist_info(msg);
+            currentSearch = await fetchedPlaylist.all_videos();
+            return currentSearch;
+        // case "sp_track":
+        //     currentSearch = await playDL.spotify(msg);
+        //     console.log(currentSearch);
+        //     return null; //TODO
         default:
             throw new Error("Type of media is not supported");    
     }

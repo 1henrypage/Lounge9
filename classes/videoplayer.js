@@ -1,5 +1,4 @@
 const serverSongQueueObject = require('./songqueue.js');
-const ytdl = require("ytdl-core");
 const playDL = require('play-dl');
 const { getVoiceConnection, createAudioPlayer, createAudioResource, AudioPlayerStatus } = require('@discordjs/voice');
 const play = require('../commands/play.js');
@@ -8,17 +7,12 @@ module.exports = async (guild,song) => {
     const songQueue = serverSongQueueObject.get(guild.id);
 
     if (!song) {
-        songQueue.voiceChannel.leave();
+        songQueue.connection.destroy();
         serverSongQueueObject.delete(guild.id);
         return;
     }
 
-    //TODO
-    const stream = await playDL.stream(song.url);
-    let resource = createAudioResource(stream.stream, {
-        inputType: stream.type
-    });
-
+    let resource = await resourceCreator(song);
     let player = createAudioPlayer();
 
     songQueue.connection.subscribe(player);
@@ -38,9 +32,12 @@ module.exports = async (guild,song) => {
         }
     });
 
-    await songQueue.textChannel.send({content: "Now playing some other song",ephemeral:false});
+    await songQueue.textChannel.send({content: "Now playing: " + song.title,ephemeral:false});
 }
 
+
+//kick behaviour
+//not in channel 
 
 async function resourceCreator(song) {
     const stream = await playDL.stream(song.url);
@@ -49,3 +46,4 @@ async function resourceCreator(song) {
     });
     return resource;
 }
+
