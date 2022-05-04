@@ -32,7 +32,6 @@ module.exports = async (guild,song) => {
         }
     });
 
-    await songQueue.textChannel.send({content: "Now playing: " + song.title,ephemeral:false});
 }
 
 

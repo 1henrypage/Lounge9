@@ -77,6 +77,7 @@ module.exports = {
                 }
                 queueLiteral.connection = connection;
                 videoPlayer(interaction.guild,queueLiteral.songs[0]);
+                return interaction.reply({content: "Now playing: " + queueLiteral.songs[0].title,ephemeral:false});
             } catch (err) {
                 serverSongQueueObject.delete(interaction.guild.id);
                 return interaction.reply({content: "Error, whilst trying to play the song",ephemeral:false});
@@ -106,7 +107,6 @@ async function typeDelegatorSearcher(msg,mediaType) {
             return currentSearch;
         // case "sp_track":
         //     currentSearch = await playDL.spotify(msg);
-        //     console.log(currentSearch);
         //     return null; //TODO
         default:
             throw new Error("Type of media is not supported");    
