@@ -4,6 +4,7 @@ const serverSongQueueObject = require('./songqueue.js');
 const playDL = require('play-dl');
 const { getVoiceConnection, createAudioPlayer, createAudioResource, AudioPlayerStatus } = require('@discordjs/voice');
 const play = require('../commands/music_commands/play.js');
+const moduleResourceCreator = require('./resourcecreator.js');
 
 module.exports = async (guild,song) => {
     const songQueue = serverSongQueueObject.get(guild.id);
@@ -14,7 +15,7 @@ module.exports = async (guild,song) => {
         return;
     }
 
-    let resource = await resourceCreator(song);
+    let resource = await moduleResourceCreator(song);
     let player = createAudioPlayer();
 
     songQueue.connection.subscribe(player);
@@ -24,7 +25,7 @@ module.exports = async (guild,song) => {
         if (newOne.status=="idle") {
             songQueue.songs.shift();
             if (songQueue.songs[0]) {
-                nextResource = await resourceCreator(songQueue.songs[0]);
+                nextResource = await moduleResourceCreator(songQueue.songs[0]);
                 player.play(nextResource);
             } else {
                 songQueue.connection.destroy();
@@ -36,11 +37,11 @@ module.exports = async (guild,song) => {
 
 }
 
-async function resourceCreator(song) {
-    const stream = await playDL.stream(song.url);
-    let resource = createAudioResource(stream.stream, {
-        inputType: stream.type
-    });
-    return resource;
-}
+// async function resourceCreator(song) {
+//     const stream = await playDL.stream(song.url);
+//     let resource = createAudioResource(stream.stream, {
+//         inputType: stream.type
+//     });
+//     return resource;
+// }
 
