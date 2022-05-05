@@ -1,7 +1,6 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const serverSongQueueObject = require("../../classes/songqueue.js");
 const videoPlayer = require("../../classes/videoplayer.js");
-const ytSearch = require('yt-search');
 const playDL = require('play-dl');
 const { entersState, VoiceConnection, VoiceConnectionStatus,joinVoiceChannel } = require('@discordjs/voice');
 
@@ -72,6 +71,7 @@ module.exports = {
                 try {
                     await entersState(connection,VoiceConnectionStatus.Ready, 30e3);
                 } catch (error) {
+                    serverSongQueueObject.delete(interaction.guild.id);
                     connection.destroy();
                     throw error;
                 }
