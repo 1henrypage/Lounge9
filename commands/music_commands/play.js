@@ -23,9 +23,6 @@ module.exports = {
             return interaction.reply({content: "ERROR: INVALID PERMISSIONS",ephemeral:true});
         }
 
-        // {servers: ['323213213213': {serverQueue: [song1,song2]}, '323215454': {serverQueue: [song1,song2]}]}
-
-
         const mediaType = await playDL.validate(message.value);
         let songInfo;
         if (mediaType) {
@@ -60,14 +57,12 @@ module.exports = {
                         await Promise.race([
                             entersState(connection,VoiceConnectionStatus.Signalling,5_000),
                             entersState(connection,VoiceConnectionStatus.Connecting,5_000),
-                            // No error detected if switching channels or connecting from a discord closed connection
                         ]);
                     } catch (error) {
                         serverSongQueueObject.delete(interaction.guild.id);
                         connection.destroy();
                     }
                 });
-                //FIX: PRINT THE CONNECTION HERE
                 try {
                     await entersState(connection,VoiceConnectionStatus.Ready, 30e3);
                 } catch (error) {
@@ -84,7 +79,6 @@ module.exports = {
             }
         } else {
             currentQueue = serverSongQueueObject.get(interaction.guild.id).songs;
-            // serverSongQueueObject.get(interaction.guild.id).songs.push(song);
             songInfo.forEach(e => currentQueue.push(e));
             return interaction.reply({content: "Song(s) Added to Queue",ephemeral:false});
         }

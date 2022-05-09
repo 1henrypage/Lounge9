@@ -37,11 +37,4 @@ module.exports = async (guild,song) => {
 
 }
 
-// async function resourceCreator(song) {
-//     const stream = await playDL.stream(song.url);
-//     let resource = createAudioResource(stream.stream, {
-//         inputType: stream.type
-//     });
-//     return resource;
-// }
 
