@@ -5,9 +5,9 @@ const { entersState, VoiceConnection, VoiceConnectionStatus,joinVoiceChannel } =
 
 class MusicCommandHandler {
 
-    static #globalQueue;
+    static globalQueue;
     static { // static initialiser
-        this.#globalQueue = new Map();
+        this.globalQueue = new Map();
     }
 
     /**
@@ -17,13 +17,6 @@ class MusicCommandHandler {
         if (this.constructor===MusicCommandHandler) {
             throw new Error("Abstract instantiation not permitted");
         }
-    }
-
-    /**
-     * Getter for the global queue
-     */
-    get queue() {
-        return this.#globalQueue;
     }
 
     /**
