@@ -64,7 +64,7 @@ class GlobalCorePlayer {
                 } catch (error) {
                     this.globalQueue.delete(interaction.guild.id);
                     connection.destroy();
-                    throw error;
+                    return interaction.reply({content: "Error, whilst trying to play the song",ephemeral:false});
                 }
                 queueLiteral.connection = connection;
                 videoPlayer(interaction.guild,queueLiteral.songs[0]);
