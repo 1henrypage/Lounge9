@@ -26,7 +26,8 @@ class MusicCommandHandler {
      * @returns The created audio resource 
      */
     static async serialiseSong(song) {
-        const stream = await playDL.stream(song.url);
+        let stream = await playDL.stream(song.url);
+
         let resource = createAudioResource(stream.stream, {
             inputType: stream.type
         });

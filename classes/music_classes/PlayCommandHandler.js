@@ -45,7 +45,6 @@ class PlayerCommandHandler extends MusicCommandHandler {
             try {
                 songInfo = await this.typeDelegatorSearcher(message.value,mediaType);
             } catch (error) {
-                console.log(error);
                 return interaction.reply({content: "Media type is currently not supported.",ephemeral:true});
             }
         } else {
@@ -58,12 +57,11 @@ class PlayerCommandHandler extends MusicCommandHandler {
                 textChannel: interaction.channel,
                 connection: null,
                 songs: [],
-                serialisedSongs: [],
                 playerHandler: null
             }
 
             this.globalQueue.set(interaction.guild.id,queueLiteral);
-            this.#addToQueue(interaction.guild,songInfo);
+            songInfo.forEach(e => this.globalQueue.get(interaction.guild.id).songs.push(e));
 
             try {
                 const connection = joinVoiceChannel({
@@ -87,7 +85,7 @@ class PlayerCommandHandler extends MusicCommandHandler {
                 } catch (error) {
                     this.globalQueue.delete(interaction.guild.id);
                     connection.destroy();
-                    return interaction.reply({content: "Error, whilst trying to play the song",ephemeral:false});
+                    return interaction.reply({content: "Error whilst trying to connect",ephemeral:false});
                 }
                 queueLiteral.connection = connection;
                 queueLiteral.playerHandler = new MusicPlayerHandler(interaction.guild);
@@ -98,9 +96,8 @@ class PlayerCommandHandler extends MusicCommandHandler {
                 return interaction.reply({content: "Error, whilst trying to play the song",ephemeral:false});
             }
         } else {
-            // currentQueue = this.globalQueue.get(interaction.guild.id).songs;
-            // songInfo.forEach(e => currentQueue.push(e));
-            this.#addToQueue(interaction.guild,songInfo);
+            currentQueue = this.globalQueue.get(interaction.guild.id).songs;
+            songInfo.forEach(e => currentQueue.push(e));
             return interaction.reply({content: "Song(s) Added to Queue",ephemeral:false});
         }
     }
@@ -124,21 +121,6 @@ class PlayerCommandHandler extends MusicCommandHandler {
                 throw new Error("Type of media is not supported");    
         }
     }
-
-    static async #addToQueue(guild, songInfo) {
-        const songQueue = this.globalQueue.get(guild.id).songs;
-        const serialisedSongs = this.globalQueue.get(guild.id).serialisedSongs;
-
-        songInfo.forEach(e => songQueue.push(e));
-        for (const song of songInfo) {
-            const resource = await this.serialiseSong(song);
-            serialisedSongs.push(resource);
-        }
-    }
-
-
-    
-
 }
 
 module.exports = PlayerCommandHandler;
