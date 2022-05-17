@@ -3,6 +3,7 @@ const videoPlayer = require("../../classes/videoplayer.js");
 const playDL = require('play-dl');
 const {createAudioPlayer, createAudioResource} = require('@discordjs/voice');
 const { entersState, VoiceConnection, VoiceConnectionStatus,joinVoiceChannel } = require('@discordjs/voice');
+const MusicPlayerHandler = require("./MusicPlayerHandler.js");
 
 class PlayerCommandHandler extends MusicCommandHandler {
 
@@ -42,8 +43,9 @@ class PlayerCommandHandler extends MusicCommandHandler {
         let songInfo;
         if (mediaType) {
             try {
-                songInfo = await typeDelegatorSearcher(message.value,mediaType);
+                songInfo = await this.typeDelegatorSearcher(message.value,mediaType);
             } catch (error) {
+                console.log(error);
                 return interaction.reply({content: "Media type is currently not supported.",ephemeral:true});
             }
         } else {
@@ -55,11 +57,13 @@ class PlayerCommandHandler extends MusicCommandHandler {
                 voiceChannel: voiceChannel,
                 textChannel: interaction.channel,
                 connection: null,
-                songs: []
+                songs: [],
+                serialisedSongs: [],
+                playerHandler: null
             }
 
             this.globalQueue.set(interaction.guild.id,queueLiteral);
-            songInfo.forEach(e => queueLiteral.songs.push(e));
+            this.#addToQueue(interaction.guild,songInfo);
 
             try {
                 const connection = joinVoiceChannel({
@@ -86,20 +90,23 @@ class PlayerCommandHandler extends MusicCommandHandler {
                     return interaction.reply({content: "Error, whilst trying to play the song",ephemeral:false});
                 }
                 queueLiteral.connection = connection;
-                videoPlayer(interaction.guild,queueLiteral.songs[0]);
+                queueLiteral.playerHandler = new MusicPlayerHandler(interaction.guild);
+                queueLiteral.playerHandler.play();
                 return interaction.reply({content: "Now playing: " + queueLiteral.songs[0].title,ephemeral:false});
             } catch (err) {
                 this.globalQueue.delete(interaction.guild.id);
                 return interaction.reply({content: "Error, whilst trying to play the song",ephemeral:false});
             }
         } else {
-            currentQueue = this.globalQueue.get(interaction.guild.id).songs;
-            songInfo.forEach(e => currentQueue.push(e));
+            // currentQueue = this.globalQueue.get(interaction.guild.id).songs;
+            // songInfo.forEach(e => currentQueue.push(e));
+            this.#addToQueue(interaction.guild,songInfo);
             return interaction.reply({content: "Song(s) Added to Queue",ephemeral:false});
         }
     }
 
     static async typeDelegatorSearcher(msg,mediaType) {
+        let currentSearch;
         switch (mediaType) {
             case "search":
                 currentSearch = await playDL.search(msg, { 
@@ -113,11 +120,19 @@ class PlayerCommandHandler extends MusicCommandHandler {
                 fetchedPlaylist = await playDL.playlist_info(msg);
                 currentSearch = await fetchedPlaylist.all_videos();
                 return currentSearch;
-            // case "sp_track":
-            //     currentSearch = await playDL.spotify(msg);
-            //     return null; //TODO
             default:
                 throw new Error("Type of media is not supported");    
+        }
+    }
+
+    static async #addToQueue(guild, songInfo) {
+        const songQueue = this.globalQueue.get(guild.id).songs;
+        const serialisedSongs = this.globalQueue.get(guild.id).serialisedSongs;
+
+        songInfo.forEach(e => songQueue.push(e));
+        for (const song of songInfo) {
+            const resource = await this.serialiseSong(song);
+            serialisedSongs.push(resource);
         }
     }
 
@@ -125,3 +140,5 @@ class PlayerCommandHandler extends MusicCommandHandler {
     
 
 }
+
+module.exports = PlayerCommandHandler;
