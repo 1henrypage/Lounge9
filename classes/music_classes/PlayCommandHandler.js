@@ -64,25 +64,24 @@ class PlayerCommandHandler extends MusicCommandHandler {
                     guildId: interaction.guild.id,
                     adapterCreator: interaction.guild.voiceAdapterCreator
                 });
+                queueLiteral.connection = connection;
                 connection.on(VoiceConnectionStatus.Disconnected, async (oldState,newState) => {
                     try {
+                        console.log(queueLiteral.playerHandler.state.status);
                         await Promise.race([
                             entersState(connection,VoiceConnectionStatus.Signalling,5_000),
                             entersState(connection,VoiceConnectionStatus.Connecting,5_000),
                         ]);
                     } catch (error) {
-                        this.globalQueue.delete(interaction.guild.id);
-                        connection.destroy();
+                        MusicCommandHandler.destroyQueue(interaction.guild);
                     }
                 });
                 try {
                     await entersState(connection,VoiceConnectionStatus.Ready, 30e3);
                 } catch (error) {
-                    this.globalQueue.delete(interaction.guild.id);
-                    connection.destroy();
+                    MusicCommandHandler.destroyQueue(interaction.guild);
                     return interaction.reply({content: "Error whilst trying to connect",ephemeral:false});
                 }
-                queueLiteral.connection = connection;
                 queueLiteral.playerHandler = new MusicPlayerHandler(interaction.guild);
                 queueLiteral.playerHandler.play();
                 return interaction.reply({content: "Now playing: " + queueLiteral.songs[0].title,ephemeral:false});
