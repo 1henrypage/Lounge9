@@ -5,7 +5,7 @@ const StopCommandHandler = require('../../classes/music_classes/StopCommandHandl
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("stop")
-        .setDescription("Stops & Terminates the Music Bots session"),
+        .setDescription("Stops the music that the bot is playing"),
     async execute(interaction) {
         return StopCommandHandler.stop(interaction);
     },    
