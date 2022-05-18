@@ -8,12 +8,8 @@ const { resolve } = require('path');
 const { getFips } = require('crypto');
 const { readdir } = require('fs').promises;
 
-//commands and songqueue object
 const commands = [];
 
-
-
-// Create a new client instance
 const client = new Client({ intents: [Intents.FLAGS.GUILDS,
     Intents.FLAGS.GUILD_MESSAGES,
     //Intents.FLAGS.GUILD_MEMBERS,
@@ -23,9 +19,7 @@ const client = new Client({ intents: [Intents.FLAGS.GUILDS,
 	
 client.commands = new Collection();
 
-// const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
 const eventFiles = fs.readdirSync('./events').filter(file=>file.endsWith('.js'));
-
 
 const commandFolders = fs.readdirSync('./commands');
 for (const folder of commandFolders) {
@@ -45,12 +39,6 @@ for (const file of eventFiles) {
 		client.on(event.name, (...args) => event.execute(...args));
 	}
 }
-
-// for (const file of commandFiles) {
-// 	const command = require(`./commands/${file}`);
-// 	commands.push(command.data.toJSON());
-// 	client.commands.set(command.data.name, command);
-// }
 
 const rest = new REST({ version: '9'}).setToken(token);
 
@@ -93,6 +81,4 @@ client.on('interactionCreate', async interaction => {
 
 })
 
-
-// Login to Discord with your client's token
 client.login(token);
