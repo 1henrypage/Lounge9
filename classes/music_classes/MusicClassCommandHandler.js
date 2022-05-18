@@ -45,7 +45,9 @@ class MusicCommandHandler {
     static destroyQueue(guild) {
         const literal = this.globalQueue.get(guild.id);
         literal.playerHandler.stop();
+        literal.playerHandler=null;
         literal.connection.destroy();
+        literal.connection=null;
         this.globalQueue.delete(guild.id);
     }
 

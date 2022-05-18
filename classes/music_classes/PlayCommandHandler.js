@@ -67,7 +67,6 @@ class PlayerCommandHandler extends MusicCommandHandler {
                 queueLiteral.connection = connection;
                 connection.on(VoiceConnectionStatus.Disconnected, async (oldState,newState) => {
                     try {
-                        console.log(queueLiteral.playerHandler.state.status);
                         await Promise.race([
                             entersState(connection,VoiceConnectionStatus.Signalling,5_000),
                             entersState(connection,VoiceConnectionStatus.Connecting,5_000),
