@@ -26,6 +26,7 @@ class MusicPlayerHandler {
         if (typeof serverInfo.songs === 'undefined' || serverInfo.songs.length === 0) {
             serverInfo.connection.destroy();
             MusicCommandHandler.globalQueue.delete(guild.id);
+            return;
         }
 
         let resource = await MusicCommandHandler.serialiseSong(serverInfo.songs[0]);
@@ -49,6 +50,20 @@ class MusicPlayerHandler {
                 }
             }
         });
+    }
+
+    /**
+     * Changes the resource of the active player to another one. 
+     * 
+     * @param {*} nextResource The next resource to be played 
+     */
+    async changeSrc(nextResource) {
+        if (this.player==null) {
+            throw new Error("Music player not initialised")
+        }
+
+        this.player.stop(false);
+        this.player.play(nextResource);
     }
 
 }

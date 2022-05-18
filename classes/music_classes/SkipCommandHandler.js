@@ -27,10 +27,10 @@ class SkipCommandHandler extends PlayCommandHandler {
             } else {
                 queueLiteral.songs.shift();
                 const nextResource = await this.serialiseSong(queueLiteral.songs[0]);
-                let player = createAudioPlayer();
-
-                queueLiteral.connection.subscribe(player);
-                player.play(nextResource);
+                if (!queueLiteral.playerHandler) {
+                    return interaction.reply({content: "No songs to skip"});
+                }
+                queueLiteral.playerHandler.changeSrc(nextResource);
                 return interaction.reply({content: "Song Skipped.",ephemeral:false});
             }
             
