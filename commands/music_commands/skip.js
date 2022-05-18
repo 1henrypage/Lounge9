@@ -4,7 +4,7 @@ const SkipCommandHandler = require("../../classes/music_classes/SkipCommandHandl
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("skip") 
-        .setDescription("skips the current song in the queue"),
+        .setDescription("Skips the current song in the queue"),
     async execute(interaction) {
         return SkipCommandHandler.skip(interaction);
     },

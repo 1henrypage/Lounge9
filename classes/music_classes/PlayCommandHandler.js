@@ -46,7 +46,7 @@ class PlayerCommandHandler extends MusicCommandHandler {
             return interaction.reply({content: "Nothing found with the search criteria",ephemeral:true});
         }
 
-        if (!this.globalQueue.get(interaction.guild.id) || (this.globalQueue.get(interaction.guild.id).songs.length == 0)) {
+        if (!this.globalQueue.get(interaction.guild.id)) {
             const queueLiteral = {
                 voiceChannel: voiceChannel,
                 textChannel: interaction.channel,
