@@ -53,6 +53,25 @@ class MusicPlayerHandler {
     }
 
     /**
+     * Pauses/Unpauses the current player
+     * 
+     * @returns 1 if it was previously playing, 0 if it was paused,
+     * -1 if it was in another state
+     */
+    async pause() {
+        if (!this.player) return;
+        let state = this.player.state.status;
+        if (state==AudioPlayerStatus.Playing) {
+            this.player.pause();
+            return 1;
+        } else if (state==AudioPlayerStatus.Paused) {
+            this.player.unpause();
+            return 0;
+        }
+        return -1;
+    }
+
+    /**
      * Changes the resource of the active player to another one. 
      * 
      * @param {*} nextResource The next resource to be played 
@@ -65,6 +84,8 @@ class MusicPlayerHandler {
         this.player.stop(false);
         this.player.play(nextResource);
     }
+
+    async 
 
 }
 
