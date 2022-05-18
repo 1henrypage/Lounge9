@@ -1,1 +1,0 @@
-module.exports = new Map(); // guild ID's -> QueueLiterals
