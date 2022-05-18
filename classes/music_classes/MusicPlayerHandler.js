@@ -85,7 +85,12 @@ class MusicPlayerHandler {
         this.player.play(nextResource);
     }
 
-    async 
+    /**
+     * Stops the music player
+     */
+    stop() {
+        this.player.stop();
+    }
 
 }
 

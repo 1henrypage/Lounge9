@@ -38,6 +38,19 @@ class MusicCommandHandler {
         return resource;
     }
 
+    /**
+     * Destroys the queue for the server - prevents memory leaks
+     * @param {} guild The server to destroy the queue for 
+     */
+    static destroyQueue(guild) {
+        const literal = this.globalQueue.get(guild.id);
+        literal.playerHandler.stop();
+        literal.playerHandler=null;
+        literal.connection.destroy();
+        literal.connection=null;
+        this.globalQueue.delete(guild.id);
+    }
+
     
 }
 
