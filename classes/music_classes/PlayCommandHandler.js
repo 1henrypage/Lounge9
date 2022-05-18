@@ -1,22 +1,12 @@
 const MusicCommandHandler = require('./MusicClassCommandHandler.js');
-const videoPlayer = require("../../classes/videoplayer.js");
 const playDL = require('play-dl');
-const {createAudioPlayer, createAudioResource} = require('@discordjs/voice');
 const { entersState, VoiceConnection, VoiceConnectionStatus,joinVoiceChannel } = require('@discordjs/voice');
 const MusicPlayerHandler = require("./MusicPlayerHandler.js");
 
+/**
+ * Wrapper Class for the Play Command
+ */
 class PlayerCommandHandler extends MusicCommandHandler {
-
-    /**
-     * 
-     * 
-     * 
-     * 
-     * MAKE THE NEW VIDEO PLAYER BETTER TO ONLY PLAY SERIALISED STREAMS
-     * 
-     * 
-     * 
-     */
 
     /**
      * DO NOT USE THIS
@@ -27,6 +17,11 @@ class PlayerCommandHandler extends MusicCommandHandler {
         }
     }
 
+    /**
+     * Business Logic for the play command
+     * @param {*} interaction The information about the user, voice channel, user
+     * @returns A message after the command was successfully executed
+     */
     static async play(interaction) {
         const message = interaction.options.get("input");
         const voiceChannel = interaction.member.voice.channel;
@@ -96,12 +91,19 @@ class PlayerCommandHandler extends MusicCommandHandler {
                 return interaction.reply({content: "Error, whilst trying to play the song",ephemeral:false});
             }
         } else {
-            currentQueue = this.globalQueue.get(interaction.guild.id).songs;
+            const currentQueue = this.globalQueue.get(interaction.guild.id).songs;
             songInfo.forEach(e => currentQueue.push(e));
             return interaction.reply({content: "Song(s) Added to Queue",ephemeral:false});
         }
     }
 
+    /**
+     * Helper method for searching the type of media
+     * 
+     * @param {*} msg The user input (e.g.: keywords, link)
+     * @param {*} mediaType The fulfilled promise containing a string with the media type
+     * @returns The Video/Stream object that has been searched
+     */
     static async typeDelegatorSearcher(msg,mediaType) {
         let currentSearch;
         switch (mediaType) {
